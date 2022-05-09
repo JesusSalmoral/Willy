@@ -29,28 +29,26 @@
 (defrule moverWilly "Mueve a willy en una dirección elegida al azar, siempre que no haya amenazas actualmente"
     (directions $? ?direction $?)
     ?h <- (hice $?)
-    ?m <- (nMovimientos ?c)
+    ?m <- (nMovimientos ?n)
     (percepts) ; No se detecta ningún peligro
-    (test (< ?c 1000)) ; No se ha alcanzado el número máximo de pasos
+    (test (< ?n 1000)) ; No se ha alcanzado el número máximo de pasos
     =>
-    (retract ?h)
-    (retract ?m)
+    (retract ?h ?m)
     (assert (hice ?direction)) ; Apuntar el movimiento que se hizo para que se puede volver a él si hay un peligro
-    (assert (nMovimientos (+ ?c 1))) ; Incrementar el número de pasos
-    (assert (moveWilly ?direction))
+    (assert (nMovimientos (+ ?n 1))) ; Incrementar el número de pasos
+    (moveWilly ?direction)
 )
 
 (defrule moverYRezarWilly "Mover a willy en una dirección aleatoria, en caso de detectar peligro y no tener apuntado el último movimiento"
     (directions $? ?direction $?)
     ?h <- (hice nada)
-    ?m <- (nMovimientos ?c)
-    (or(percepts Pull) (percepts Noise)) ; Se detecta algún peligro
-    (test(< ?c 1000)) ; No se ha alcanzado el número máximo de pasos
+    ?m <- (nMovimientos ?n)
+    (or (percepts Pull) (percepts Noise)) ; Se detecta algún peligro
+    (test (< ?n 1000)) ; No se ha alcanzado el número máximo de pasos
         =>
-    (retract ?h)
-    (retract ?m)
+    (retract ?h ?m)
     (assert (hice ?direction)) ; Apuntar el movimiento que se hizo para que se puede volver a él si hay un peligro
-    (assert (nMovimientos (+ ?c 1))) ; Incrementar el número de pasos
+    (assert (nMovimientos (+ ?n 1))) ; Incrementar el número de pasos
     (moveWilly ?direction)
 )
 
@@ -58,10 +56,10 @@
     (declare (salience 10))
     (directions $? south $?)
     ?h <- (hice north) ; Condición para que esta regla se ejecute sólo para volver de un movimiento hacia arriba
-    ?m <- (nMovimientos ?n) 
+    ?m <- (nMovimientos ?n)
     (or (percepts Pull) (percepts Noise)) ; Se detecta algún peligro
     (test (< ?n 1000)) ; No se ha alcanzado el número máximo de pasos
-         =>
+        =>
     (retract ?h ?m)
     (assert (hice nada)); No hace falta apuntar lo que se hizo
     (assert (nMovimientos (+ ?n 1))) ; Incrementar el número de pasos
